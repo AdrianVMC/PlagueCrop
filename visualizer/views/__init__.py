@@ -1,5 +1,5 @@
-from .main_menu import MainMenu
+from .main_view import MainView
 
 __all__ = [
-    "MainMenu",
+    "MainView",
 ]

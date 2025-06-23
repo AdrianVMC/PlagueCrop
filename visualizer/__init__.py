@@ -1,5 +1,7 @@
-from .views import MainMenu
+from .views import MainView
+from .styles import BaseStyles
 
 __all__ = [
-    "MainMenu",
+    "MainView",
+    "BaseStyles",
 ]
