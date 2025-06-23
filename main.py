@@ -1,6 +1,5 @@
-import tkinter as tk
-root = tk.Tk()
-root.title("Test Window")
-tk.Label(root, text="Hello! If you see this, Tkinter works.").pack()
-root.mainloop()
+from app import App
 
+if __name__ == "__main__":
+    app = App()
+    app.mainloop()
