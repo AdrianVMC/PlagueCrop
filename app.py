@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from visualizer import MainView ,BaseStyles
-
+from visualizer import MainView, SettingsView, BaseStyles
 
 class App(tk.Tk):
     def __init__(self):
@@ -16,15 +15,15 @@ class App(tk.Tk):
         except:
             pass
 
+        style = ttk.Style(self)
+        BaseStyles(style)
+
         self.view_classes = {
-            "MainView": MainView
+            "MainView": MainView,
+            "SettingsView": SettingsView
         }
 
         self.current_view = None
-
-        style = ttk.Style()
-        BaseStyles(style)
-
         self.show_view("MainView")
 
     def show_view(self, view_name):
@@ -35,8 +34,16 @@ class App(tk.Tk):
         if not view_class:
             raise ValueError(f"View {view_name} not found")
 
-        self.current_view = view_class(self, self)
+        # Pasar on_continue solo si la vista lo requiere
+        if view_name == "SettingsView":
+            self.current_view = view_class(self, self.on_continue)
+        else:
+            self.current_view = view_class(self, self)
+
         self.current_view.pack(expand=True, fill="both", padx=20, pady=20)
+
+    def on_continue(self):
+        print("¡Simulación iniciada desde SettingsView!")
 
 if __name__ == "__main__":
     app = App()
