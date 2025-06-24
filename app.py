@@ -25,6 +25,8 @@ class App(tk.Tk):
         }
 
         self.current_view = None
+        self.settings = {}
+
         self.show_view("MainView")
 
     def show_view(self, view_name):
@@ -37,12 +39,16 @@ class App(tk.Tk):
 
         if view_name == "SettingsView":
             self.current_view = view_class(self, self.on_continue)
+        elif view_name == "SimulationView":
+            self.current_view = view_class(self, self, self.settings)
         else:
             self.current_view = view_class(self, self)
 
         self.current_view.pack(expand=True, fill="both", padx=20, pady=20)
 
     def on_continue(self):
+        if hasattr(self.current_view, "get_settings"):
+            self.settings = self.current_view.get_settings()
         self.show_view("SimulationView")
 
 if __name__ == "__main__":
