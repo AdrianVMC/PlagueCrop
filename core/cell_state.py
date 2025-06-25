@@ -37,23 +37,14 @@ class Cell:
         self.plague_type = None
         self.plague_density = 0
         self.damage_capacity = 1
-
-        # Condiciones ambientales
         self.environment = {
             "humidity": 50,
             "solar_intensity": 2,
-            "fertility": fertility  # ← NUEVO: Fertilidad del suelo (0.0 a 1.0)
+            "fertility": fertility
         }
-
         self.pesticide_level = 1
         self.occupied = False
-
-        # SIR Model
         self.infection_duration = 0
         self.recovery_timer = 0
-
-        # Cooldown para reinfección
         self.susceptibility_cooldown = 0
-
-        # Resistencia a la infestación
         self.resistance_level = resistance_level

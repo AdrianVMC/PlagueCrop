@@ -3,13 +3,6 @@ from reportlab.pdfgen import canvas
 from datetime import datetime
 
 def generate_pdf_report(path, settings, stats):
-    """
-    Genera un archivo PDF con los resultados de la simulación.
-
-    :param path: Ruta donde se guardará el PDF.
-    :param settings: Diccionario con la configuración de la simulación.
-    :param stats: Diccionario con las estadísticas finales.
-    """
     c = canvas.Canvas(path, pagesize=A4)
     width, height = A4
     y = height - 50

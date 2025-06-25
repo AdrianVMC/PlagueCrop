@@ -11,42 +11,36 @@ class SimulationView(tk.Frame):
         self.settings = settings
         self.configure(background="#f5f5f5")
         
-        # Configuración de la simulación
         self.rows = self.settings.get("rows", 20)
         self.cols = self.settings.get("cols", 20)
         self.cell_size = 20
         self.step_counter = 0
         self.max_steps = self.settings.get("steps", 20)
         self.is_paused = False
-        self.simulation_speed = 1000  # Velocidad inicial en ms (1 segundo)
+        self.simulation_speed = 1000 
         
-        # Inicializar autómata celular
         self.automaton = CellAutomaton(self.rows, self.cols, self.settings)
         self.automaton.initialize_with_settings(self.settings)
         
-        # Construir interfaz
+
         self._build_ui()
         
-        # Iniciar simulación
+
         self._run_simulation()
 
     def _build_ui(self):
-        # Frame principal
         main_frame = ttk.Frame(self, style='TFrame')
         main_frame.pack(fill="both", expand=True, padx=20, pady=20)
         
-        # Título
         ttk.Label(
             main_frame, 
             text="Simulación en Progreso", 
             style="Title.TLabel"
         ).pack(pady=(0, 15))
         
-        # Frame para los canvas
         canvas_frame = ttk.Frame(main_frame)
         canvas_frame.pack(pady=10)
         
-        # Canvas para vista de infestación
         self.canvas_infestation = tk.Canvas(
             canvas_frame, 
             width=self.cols * self.cell_size, 
@@ -56,7 +50,6 @@ class SimulationView(tk.Frame):
         )
         self.canvas_infestation.pack(side="left", padx=10)
         
-        # Canvas para vista de daño
         self.canvas_damage = tk.Canvas(
             canvas_frame, 
             width=self.cols * self.cell_size, 
@@ -66,7 +59,6 @@ class SimulationView(tk.Frame):
         )
         self.canvas_damage.pack(side="right", padx=10)
         
-        # Vistas de la cuadrícula
         self.grid_view_infestation = GridView(
             self.canvas_infestation, 
             self.automaton, 
@@ -80,19 +72,19 @@ class SimulationView(tk.Frame):
             view_mode="damage"
         )
         
-        # Controles
+
         self._build_controls(main_frame)
         
-        # Dibujar estado inicial
+
         self.grid_view_infestation.draw()
         self.grid_view_damage.draw()
 
     def _build_controls(self, parent):
-        # Frame para controles
+
         control_frame = ttk.Frame(parent)
         control_frame.pack(fill="x", pady=(15, 5))
         
-        # Contador de pasos
+
         self.step_label = ttk.Label(
             control_frame,
             text=f"Paso: {self.step_counter}/{self.max_steps}",
@@ -100,8 +92,7 @@ class SimulationView(tk.Frame):
             foreground="#4a6fa5"
         )
         self.step_label.pack(side="left", padx=10)
-        
-        # Control de velocidad
+
         speed_frame = ttk.Frame(control_frame)
         speed_frame.pack(side="left", padx=20)
         
@@ -113,8 +104,8 @@ class SimulationView(tk.Frame):
         
         self.speed_slider = ttk.Scale(
             speed_frame,
-            from_=50,  # Más rápido (50ms)
-            to=2000,   # Más lento (2 segundos)
+            from_=50,
+            to=2000,
             value=self.simulation_speed,
             command=self._update_speed
         )
@@ -127,11 +118,10 @@ class SimulationView(tk.Frame):
         )
         self.speed_label.pack(side="left")
         
-        # Frame para botones
+
         btn_frame = ttk.Frame(control_frame)
         btn_frame.pack(side="right")
-        
-        # Botón de pausa/reanudar
+
         self.pause_btn = ttk.Button(
             btn_frame,
             text="Pausar",
@@ -140,7 +130,6 @@ class SimulationView(tk.Frame):
         )
         self.pause_btn.pack(side="left", padx=5)
         
-        # Botón para terminar temprano
         ttk.Button(
             btn_frame,
             text="Terminar",
@@ -163,11 +152,9 @@ class SimulationView(tk.Frame):
             self.step_counter += 1
             self.step_label.config(text=f"Paso: {self.step_counter}/{self.max_steps}")
             
-            # Actualizar vistas
             self.grid_view_infestation.draw()
             self.grid_view_damage.draw()
         
-        # Programar próximo paso con la velocidad actual
         self.after(self.simulation_speed, self._run_simulation)
 
     def _toggle_pause(self):

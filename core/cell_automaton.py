@@ -11,25 +11,21 @@ class CellAutomaton:
         self.seed_infestation()
 
     def _create_cell(self) -> Cell:
-        # Obtener configuraciones de entorno y celda
         humidity = self.settings.get("humidity", 50)
         solar_intensity = self.settings.get("solar_intensity", 2)
         pesticide_level = self.settings.get("pesticide_level", 1)
-        fertility = self.settings.get("soil_fertility", 0.5)  # NUEVO
+        fertility = self.settings.get("soil_fertility", 0.5)
         occupation_density = self.settings.get("occupation_density", 80) / 100.0
 
-        # Obtener resistencia
         resistance_str = self.settings.get("resistance_level", "MEDIUM").upper()
         resistance_level = ResistanceLevel[resistance_str] if resistance_str in ResistanceLevel.__members__ else ResistanceLevel.MEDIUM
 
-        # Crear celda con atributos personalizados
         cell = Cell(resistance_level=resistance_level, fertility=fertility)
         cell.environment["humidity"] = humidity
         cell.environment["solar_intensity"] = solar_intensity
         cell.pesticide_level = pesticide_level
         cell.occupied = random() < occupation_density
 
-        # Estado del cultivo
         crop_stage_str = self.settings.get("crop_stage", "GROWING")
         try:
             cell.crop_stage = CropStage[crop_stage_str]
