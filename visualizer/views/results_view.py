@@ -1,6 +1,7 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from datetime import datetime
+from pathlib import Path
 from utils.report_generator import generate_pdf_report
 
 class ResultsView(tk.Frame):
@@ -13,7 +14,6 @@ class ResultsView(tk.Frame):
         self._build_ui()
 
     def _build_ui(self):
-        
         main_container = ttk.Frame(self, style='TFrame')
         main_container.pack(fill="both", expand=True, padx=20, pady=20)
 
@@ -26,7 +26,6 @@ class ResultsView(tk.Frame):
                                      text="Estadísticas de la Simulación", 
                                      style="Section.TLabelframe")
         results_frame.pack(fill="both", expand=True, padx=10, pady=10)
-
 
         text_container = ttk.Frame(results_frame)
         text_container.pack(fill="both", expand=True, padx=5, pady=5)
@@ -49,12 +48,10 @@ class ResultsView(tk.Frame):
         self.text.pack(side="left", fill="both", expand=True)
         scrollbar.config(command=self.text.yview)
 
-
         self._display_results()
 
         button_frame = ttk.Frame(main_container)
         button_frame.pack(fill="x", pady=(15, 5))
-
 
         new_sim_btn = ttk.Button(button_frame, 
                                text="Nueva Simulación", 
@@ -124,11 +121,21 @@ class ResultsView(tk.Frame):
         self.controller.show_view("SettingsView")
 
     def _export_pdf(self):
-        path = f"reports/sim_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-        generate_pdf_report(path, self.settings, self.stats)
-        
+        # Crear carpeta segura en Documentos
+        base_dir = Path.home() / "Documents" / "PlagueCrop_Reports"
+        base_dir.mkdir(parents=True, exist_ok=True)
 
+        # Nombre con fecha y hora
+        path = base_dir / f"sim_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+
+        # Generar el PDF
+        generate_pdf_report(path, self.settings, self.stats)
+
+        # Mostrar resultado en la interfaz
         self.text.insert("end", "\n\n", "header")
         self.text.insert("end", "✓ Reporte exportado exitosamente\n", "positive")
         self.text.insert("end", f"Ubicación: {path}\n")
-        self.text.see("end") 
+        self.text.see("end")
+
+        # Mostrar alerta al usuario
+        messagebox.showinfo("Reporte Exportado", f"El PDF fue guardado en:\n{path}")
