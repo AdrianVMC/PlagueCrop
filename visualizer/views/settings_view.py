@@ -1,118 +1,149 @@
 import tkinter as tk
 from tkinter import ttk
 
-
 class SettingsView(tk.Frame):
     def __init__(self, master, on_continue):
         super().__init__(master)
         self.on_continue = on_continue
         self.settings = {}
-
+        
+        # Configuración del frame principal
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        self.configure(background="#f5f5f5")
+        
         self._build_ui()
 
     def _build_ui(self):
-        tk.Label(self, text="Configuración de la Simulación", font=("Arial", 16, "bold")).pack(pady=10)
-        form_frame = tk.Frame(self)
-        form_frame.pack(pady=10)
+        # Contenedor principal con scroll horizontal y vertical
+        outer_container = ttk.Frame(self)
+        outer_container.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        
+        # Canvas y scrollbars
+        canvas = tk.Canvas(outer_container, bg="#f5f5f5", highlightthickness=0)
+        h_scrollbar = ttk.Scrollbar(outer_container, orient="horizontal", command=canvas.xview)
+        v_scrollbar = ttk.Scrollbar(outer_container, orient="vertical", command=canvas.yview)
+        
+        scrollable_frame = ttk.Frame(canvas)
+        
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(
+                scrollregion=canvas.bbox("all")
+            )
+        )
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(
+            xscrollcommand=h_scrollbar.set,
+            yscrollcommand=v_scrollbar.set
+        )
+        
+        # Grid layout para los elementos de scroll
+        canvas.grid(row=0, column=0, sticky="nsew")
+        v_scrollbar.grid(row=0, column=1, sticky="ns")
+        h_scrollbar.grid(row=1, column=0, sticky="ew")
+        
+        outer_container.grid_rowconfigure(0, weight=1)
+        outer_container.grid_columnconfigure(0, weight=1)
+        
+        # Contenido del formulario
+        self._build_form_content(scrollable_frame)
 
-        row = 0
+    def _build_form_content(self, parent):
+        # Título principal
+        ttk.Label(parent, 
+                 text="Configuración de la Simulación", 
+                 style="Title.TLabel").grid(row=0, column=0, columnspan=4, pady=(0, 20), sticky="w")
 
-        # Humedad
-        tk.Label(form_frame, text="Nivel de humedad").grid(row=row, column=0, sticky="e", pady=5)
-        self.humidity_var = tk.IntVar(value=2)
-        for i in range(1, 4):
-            tk.Radiobutton(form_frame, text=str(i), variable=self.humidity_var, value=i).grid(row=row, column=i)
-        row += 1
+        # Ajustar el ancho mínimo de las columnas
+        for i in range(4):
+            parent.grid_columnconfigure(i, weight=1, minsize=120)
+        
+        # Sección: Condiciones ambientales
+        env_frame = ttk.LabelFrame(parent, text="Condiciones Ambientales", style="Section.TLabelframe")
+        env_frame.grid(row=1, column=0, columnspan=4, sticky="ew", padx=5, pady=5, ipadx=5, ipady=5)
 
-        # Solar
-        tk.Label(form_frame, text="Intensidad solar").grid(row=row, column=0, sticky="e", pady=5)
-        self.solar_var = tk.IntVar(value=2)
-        for i in range(1, 4):
-            tk.Radiobutton(form_frame, text=str(i), variable=self.solar_var, value=i).grid(row=row, column=i)
-        row += 1
+        self._create_radio_group(env_frame, "Nivel de humedad", "humidity", 2, 3)
+        self._create_radio_group(env_frame, "Intensidad solar", "solar", 2, 3, row=1)
+        self._create_radio_group(env_frame, "Nivel de pesticidas", "pesticide", 1, 3, row=2)
 
-        # Pesticidas
-        tk.Label(form_frame, text="Nivel de pesticidas").grid(row=row, column=0, sticky="e", pady=5)
-        self.pesticide_var = tk.IntVar(value=1)
-        for i in range(1, 4):
-            tk.Radiobutton(form_frame, text=str(i), variable=self.pesticide_var, value=i).grid(row=row, column=i)
-        row += 1
+        # Sección: Cultivo
+        crop_frame = ttk.LabelFrame(parent, text="Cultivo", style="Section.TLabelframe")
+        crop_frame.grid(row=2, column=0, columnspan=4, sticky="ew", padx=5, pady=5, ipadx=5, ipady=5)
 
-        # Etapa del cultivo
-        tk.Label(form_frame, text="Etapa del cultivo").grid(row=row, column=0, sticky="e", pady=5)
-        self.stage_var = tk.StringVar(value="GROWING")
-        ttk.Combobox(form_frame, textvariable=self.stage_var, values=["GRAIN", "GROWING", "MATURE"]).grid(row=row, column=1)
-        row += 1
+        self._create_combobox(crop_frame, "Etapa del cultivo", "stage", ["GRAIN", "GROWING", "MATURE"], "GROWING")
+        self._create_combobox(crop_frame, "Tipo de cultivo", "crop", ["MAIZE", "WHEAT", "BEAN"], "MAIZE", row=1)
 
-        # Tipo de cultivo
-        tk.Label(form_frame, text="Tipo de cultivo").grid(row=row, column=0, sticky="e", pady=5)
-        self.crop_var = tk.StringVar(value="MAIZE")
-        ttk.Combobox(form_frame, textvariable=self.crop_var, values=["MAIZE", "WHEAT", "BEAN"]).grid(row=row, column=1)
-        row += 1
+        # Sección: Plaga
+        plague_frame = ttk.LabelFrame(parent, text="Plaga", style="Section.TLabelframe")
+        plague_frame.grid(row=3, column=0, columnspan=4, sticky="ew", padx=5, pady=5, ipadx=5, ipady=5)
 
-        # Tipo de plaga
-        tk.Label(form_frame, text="Tipo de plaga").grid(row=row, column=0, sticky="e", pady=5)
-        self.plague_var = tk.StringVar(value="WORM")
-        ttk.Combobox(form_frame, textvariable=self.plague_var, values=["WORM", "BUG", "FLY"]).grid(row=row, column=1)
-        row += 1
+        self._create_combobox(plague_frame, "Tipo de plaga", "plague", ["WORM", "BUG", "FLY"], "WORM")
+        self._create_combobox(plague_frame, "Densidad de infestación inicial", "infestation", 
+                            ["LOW", "MEDIUM", "HIGH"], "MEDIUM", row=1)
+        self._create_entry(plague_frame, "Capacidad de infestación (1-3)", "infestation_power", 2, row=2)
 
-        # Densidad de infestación inicial
-        tk.Label(form_frame, text="Densidad de infestación inicial").grid(row=row, column=0, sticky="e", pady=5)
-        self.infestation_var = tk.StringVar(value="MEDIUM")
-        ttk.Combobox(form_frame, textvariable=self.infestation_var, values=["LOW", "MEDIUM", "HIGH"]).grid(row=row, column=1)
-        row += 1
+        # Sección: Parámetros de simulación (2 columnas)
+        sim_frame = ttk.LabelFrame(parent, text="Simulación", style="Section.TLabelframe")
+        sim_frame.grid(row=4, column=0, columnspan=4, sticky="ew", padx=5, pady=5, ipadx=5, ipady=5)
 
-        # Densidad de ocupación
-        tk.Label(form_frame, text="Densidad de ocupación de cultivos (%)").grid(row=row, column=0, sticky="e", pady=5)
-        self.occupation_var = tk.IntVar(value=80)
-        tk.Entry(form_frame, textvariable=self.occupation_var).grid(row=row, column=1)
-        row += 1
+        # Primera columna
+        self._create_entry(sim_frame, "Densidad de ocupación (%)", "occupation", 80, col=0)
+        self._create_entry(sim_frame, "Duración de infección", "infection_duration", 3, row=1, col=0)
+        self._create_entry(sim_frame, "Cooldown recuperación", "recovery_cooldown", 5, row=2, col=0)
+        
+        # Segunda columna
+        self._create_entry(sim_frame, "Cooldown susceptibilidad", "susceptibility_cooldown", 3, col=1)
+        self._create_entry(sim_frame, "Filas de la cuadrícula", "rows", 20, row=1, col=1)
+        self._create_entry(sim_frame, "Columnas de la cuadrícula", "cols", 20, row=2, col=1)
+        self._create_entry(sim_frame, "Número de pasos", "steps", 20, row=3, col=1)
 
-        # Capacidad de infestación
-        tk.Label(form_frame, text="Capacidad de infestación (1-3)").grid(row=row, column=0, sticky="e", pady=5)
-        self.infestation_power_var = tk.IntVar(value=2)
-        tk.Entry(form_frame, textvariable=self.infestation_power_var).grid(row=row, column=1)
-        row += 1
+        # Botón de acción
+        btn_frame = ttk.Frame(parent)
+        btn_frame.grid(row=5, column=0, columnspan=4, pady=(15, 5))
+        
+        ttk.Button(btn_frame, 
+                  text="Iniciar Simulación", 
+                  style="Primary.TButton", 
+                  command=self._submit).pack(pady=5, ipadx=20, ipady=5)
 
-        # Duración de infección (pasos)
-        tk.Label(form_frame, text="Duración de infección").grid(row=row, column=0, sticky="e", pady=5)
-        self.infection_duration_var = tk.IntVar(value=3)
-        tk.Entry(form_frame, textvariable=self.infection_duration_var).grid(row=row, column=1)
-        row += 1
+    def _create_radio_group(self, parent, label_text, var_name, default_value, max_value, row=0):
+        """Crea un grupo de radio buttons con etiqueta"""
+        label = ttk.Label(parent, text=label_text)
+        label.grid(row=row, column=0, sticky="e", padx=5, pady=5)
+        
+        var = tk.IntVar(value=default_value)
+        setattr(self, f"{var_name}_var", var)
+        
+        for i in range(1, max_value + 1):
+            rb = ttk.Radiobutton(parent, text=str(i), variable=var, value=i)
+            rb.grid(row=row, column=i, padx=5, pady=5, sticky="w")
 
-        # Cooldown recuperación (pasos)
-        tk.Label(form_frame, text="Cooldown de recuperación").grid(row=row, column=0, sticky="e", pady=5)
-        self.recovery_cooldown_var = tk.IntVar(value=5)
-        tk.Entry(form_frame, textvariable=self.recovery_cooldown_var).grid(row=row, column=1)
-        row += 1
+    def _create_combobox(self, parent, label_text, var_name, values, default_value, row=0):
+        """Crea un combobox con etiqueta"""
+        label = ttk.Label(parent, text=label_text)
+        label.grid(row=row, column=0, sticky="e", padx=5, pady=5)
+        
+        var = tk.StringVar(value=default_value)
+        setattr(self, f"{var_name}_var", var)
+        
+        cb = ttk.Combobox(parent, textvariable=var, values=values, state="readonly", width=18)
+        cb.grid(row=row, column=1, padx=5, pady=5, sticky="ew")
 
-        # Enfriamiento tras recuperación (inmunidad temporal)
-        tk.Label(form_frame, text="Cooldown de susceptibilidad").grid(row=row, column=0, sticky="e", pady=5)
-        self.susceptibility_cooldown_var = tk.IntVar(value=3)
-        tk.Entry(form_frame, textvariable=self.susceptibility_cooldown_var).grid(row=row, column=1)
-        row += 1
-
-        # Tamaño del grid
-        tk.Label(form_frame, text="Filas de la cuadrícula").grid(row=row, column=0, sticky="e", pady=5)
-        self.rows_var = tk.IntVar(value=20)
-        tk.Entry(form_frame, textvariable=self.rows_var).grid(row=row, column=1)
-        row += 1
-
-        tk.Label(form_frame, text="Columnas de la cuadrícula").grid(row=row, column=0, sticky="e", pady=5)
-        self.cols_var = tk.IntVar(value=20)
-        tk.Entry(form_frame, textvariable=self.cols_var).grid(row=row, column=1)
-        row += 1
-
-        # Número de pasos
-        tk.Label(form_frame, text="Número de pasos").grid(row=row, column=0, sticky="e", pady=5)
-        self.steps_var = tk.IntVar(value=20)
-        tk.Entry(form_frame, textvariable=self.steps_var).grid(row=row, column=1)
-        row += 1
-
-        # Botón de iniciar
-        tk.Button(self, text="Iniciar Simulación", command=self._submit).pack(pady=10)
+    def _create_entry(self, parent, label_text, var_name, default_value, row=0, col=0):
+        """Crea una entrada de texto con etiqueta"""
+        label = ttk.Label(parent, text=label_text)
+        label.grid(row=row, column=col*2, sticky="e", padx=5, pady=5)
+        
+        var = tk.IntVar(value=default_value)
+        setattr(self, f"{var_name}_var", var)
+        
+        entry = ttk.Entry(parent, textvariable=var, width=20)
+        entry.grid(row=row, column=col*2+1, padx=5, pady=5, sticky="ew")
 
     def _submit(self):
+        """Recopila todos los ajustes y llama a la función de continuación"""
         self.settings = {
             "humidity": self.humidity_var.get(),
             "solar_intensity": self.solar_var.get(),
