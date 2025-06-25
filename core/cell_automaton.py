@@ -22,7 +22,6 @@ class CellAutomaton:
         except KeyError:
             cell.crop_stage = CropStage.GROWING
 
-        # Ocupación aleatoria según densidad
         occupation_density = self.settings.get("occupation_density", 80) / 100.0
         cell.occupied = random() < occupation_density
 
@@ -43,7 +42,10 @@ class CellAutomaton:
         }.get(density, 5)
 
         seeded = 0
-        while seeded < count:
+        attempts = 0
+        max_attempts = count * 10
+
+        while seeded < count and attempts < max_attempts:
             x = randint(0, self.rows - 1)
             y = randint(0, self.cols - 1)
             cell = self.grid[x][y]
@@ -53,6 +55,7 @@ class CellAutomaton:
                 cell.plague_density = 1
                 cell.damage_capacity = damage_capacity
                 seeded += 1
+            attempts += 1
 
     def initialize_with_settings(self, settings: dict):
         self.settings = settings
@@ -79,4 +82,4 @@ class CellAutomaton:
                 cell = self.grid[x][y]
                 neighbors = self.get_neighbors(x, y)
                 infestation_power = self.settings.get("infestation_power", 1)
-                update_cell(cell, neighbors, infestation_power=infestation_power)
+                update_cell(cell, neighbors, infestation_power=infestation_power, settings=self.settings)

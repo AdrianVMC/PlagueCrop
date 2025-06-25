@@ -74,6 +74,18 @@ class SettingsView(tk.Frame):
         tk.Entry(form_frame, textvariable=self.infestation_power_var).grid(row=row, column=1)
         row += 1
 
+        # Duración de infección (pasos)
+        tk.Label(form_frame, text="Duración de infección").grid(row=row, column=0, sticky="e", pady=5)
+        self.infection_duration_var = tk.IntVar(value=3)
+        tk.Entry(form_frame, textvariable=self.infection_duration_var).grid(row=row, column=1)
+        row += 1
+
+        # Cooldown recuperación (pasos)
+        tk.Label(form_frame, text="Cooldown de recuperación").grid(row=row, column=0, sticky="e", pady=5)
+        self.recovery_cooldown_var = tk.IntVar(value=5)
+        tk.Entry(form_frame, textvariable=self.recovery_cooldown_var).grid(row=row, column=1)
+        row += 1
+
         # Tamaño del grid
         tk.Label(form_frame, text="Filas de la cuadrícula").grid(row=row, column=0, sticky="e", pady=5)
         self.rows_var = tk.IntVar(value=20)
@@ -105,6 +117,8 @@ class SettingsView(tk.Frame):
             "infestation_density": self.infestation_var.get(),
             "occupation_density": self.occupation_var.get(),
             "infestation_power": self.infestation_power_var.get(),
+            "infection_duration_threshold": self.infection_duration_var.get(),
+            "recovery_cooldown": self.recovery_cooldown_var.get(),
             "rows": self.rows_var.get(),
             "cols": self.cols_var.get(),
             "steps": self.steps_var.get()

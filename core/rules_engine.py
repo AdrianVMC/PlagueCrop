@@ -43,15 +43,32 @@ def should_infest(cell: Cell, infected_neighbors: int, infestation_power: int = 
     return chance >= 40
 
 
-def update_cell(cell: Cell, neighbors: list[Cell], infestation_power: int = 1) -> None:
+def update_cell(cell: Cell, neighbors: list[Cell], infestation_power: int = 1, settings: dict = None) -> None:
+    settings = settings or {}
+    infection_threshold = settings.get("infection_duration_threshold", 3)
+    recovery_cooldown = settings.get("recovery_cooldown", 5)
+
     if cell.infestation_state == InfestationState.HEALTHY:
         infected_neighbors = sum(1 for n in neighbors if n.infestation_state == InfestationState.INFESTED)
         if should_infest(cell, infected_neighbors, infestation_power):
             cell.infestation_state = InfestationState.INFESTED
+            cell.infection_duration = 1
             cell.plague_density = 1
+
     elif cell.infestation_state == InfestationState.INFESTED:
+        cell.infection_duration += 1
         cell.plague_density = min(cell.plague_density + 1, 3)
-        if cell.crop_stage != CropStage.MATURE:
-            for _ in range(cell.damage_capacity):
-                if cell.damage_level != DamageLevel.SEVERE:
-                    cell.damage_level = advance_damage_level(cell.damage_level)
+        if cell.infection_duration >= infection_threshold:
+            cell.infestation_state = InfestationState.RECOVERED
+            cell.recovery_timer = recovery_cooldown
+        else:
+            if cell.crop_stage != CropStage.MATURE:
+                for _ in range(cell.damage_capacity):
+                    if cell.damage_level != DamageLevel.SEVERE:
+                        cell.damage_level = advance_damage_level(cell.damage_level)
+
+    elif cell.infestation_state == InfestationState.RECOVERED:
+        cell.recovery_timer -= 1
+        if cell.recovery_timer <= 0:
+            cell.infestation_state = InfestationState.HEALTHY
+            cell.infection_duration = 0
