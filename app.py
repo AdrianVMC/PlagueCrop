@@ -48,6 +48,12 @@ class App(tk.Tk):
 
         self.current_view.pack(expand=True, fill="both", padx=20, pady=20)
 
+    def show_custom_view(self, view_class, **kwargs):
+        if self.current_view:
+            self.current_view.destroy()
+        self.current_view = view_class(self, self, **kwargs)
+        self.current_view.pack(expand=True, fill="both", padx=20, pady=20)
+
     def _go_to_settings(self, *_):
         self.show_view("SettingsView")
 

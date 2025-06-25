@@ -1,54 +1,50 @@
 from enum import Enum, auto
 
-
 class InfestationState(Enum):
     HEALTHY = auto()
-    INFESTED = auto()
+    EXPOSED = auto()
+    INFESTED_LIGHT = auto()
+    INFESTED_SEVERE = auto()
     RECOVERED = auto()
+    DAMAGED = auto()
 
+class ResistanceLevel(Enum):
+    HIGH = auto()
+    MEDIUM = auto()
+    LOW = auto()
 
 class DamageLevel(Enum):
-    NONE = 0
-    LOW = 1
-    MODERATE = 2
-    SEVERE = 3
-
+    NONE = auto()
+    LOW = auto()
+    MODERATE = auto()
+    SEVERE = auto()
 
 class CropStage(Enum):
+    GRAIN = auto()
     GROWING = auto()
-    GRAIN_FILL = auto()
     MATURE = auto()
 
-
 class PlagueType(Enum):
-    WORM = "worm"
-    BUG = "bug"
-    MIDGE = "midge"
-
+    WORM = auto()
+    BUG = auto()
+    FLY = auto()
 
 class Cell:
-    def __init__(self):
-        # Crop state
-        self.crop_stage = CropStage.GROWING
+    def __init__(self, resistance_level=ResistanceLevel.MEDIUM, fertility=0.5):
         self.infestation_state = InfestationState.HEALTHY
         self.damage_level = DamageLevel.NONE
-
-        # Plague attributes
+        self.crop_stage = CropStage.GROWING
         self.plague_type = None
-        self.plague_density = 0         # 0 to 3
-        self.reproduction_capacity = 1  # 1 to 3
-        self.damage_capacity = 1        # 1 to 3
-
-        # Environmental modifiers (can also be global)
-        self.pesticide_level = 1        # 1 to 3
+        self.plague_density = 0
+        self.damage_capacity = 1
         self.environment = {
-            "humidity": 50,             # 0 to 100
-            "solar_intensity": 2        # 1 to 3
+            "humidity": 50,
+            "solar_intensity": 2,
+            "fertility": fertility
         }
-        self.occupied = True
-
-    def is_infestable(self):
-        return self.infestation_state == InfestationState.HEALTHY
-
-    def can_spread(self):
-        return self.infestation_state == InfestationState.INFESTED and self.plague_density > 0
+        self.pesticide_level = 1
+        self.occupied = False
+        self.infection_duration = 0
+        self.recovery_timer = 0
+        self.susceptibility_cooldown = 0
+        self.resistance_level = resistance_level
