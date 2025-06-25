@@ -1,6 +1,6 @@
 from core.cell_state import Cell, InfestationState, PlagueType, CropStage
 from core.rules_engine import update_cell, get_damage_capacity
-from random import randint
+from random import randint, random
 
 class CellAutomaton:
     def __init__(self, rows: int, cols: int, settings: dict = None):
@@ -12,17 +12,19 @@ class CellAutomaton:
 
     def _create_cell(self) -> Cell:
         cell = Cell()
-        # Apply environment settings
         cell.environment["humidity"] = self.settings.get("humidity", 50)
         cell.environment["solar_intensity"] = self.settings.get("solar_intensity", 2)
         cell.pesticide_level = self.settings.get("pesticide_level", 1)
 
-        # Crop stage from string
         crop_stage_str = self.settings.get("crop_stage", "GROWING")
         try:
             cell.crop_stage = CropStage[crop_stage_str]
         except KeyError:
             cell.crop_stage = CropStage.GROWING
+
+        # Ocupación aleatoria según densidad
+        occupation_density = self.settings.get("occupation_density", 80) / 100.0
+        cell.occupied = random() < occupation_density
 
         return cell
 
@@ -31,7 +33,6 @@ class CellAutomaton:
         crop_type = self.settings.get("crop_type", "MAIZE")
         damage_capacity = get_damage_capacity(plague_type, crop_type)
 
-        # Cuántas celdas se infestan según densidad
         density = self.settings.get("infestation_density", "MEDIUM").upper()
         total_cells = self.rows * self.cols
 
@@ -58,6 +59,9 @@ class CellAutomaton:
         self.grid = [[self._create_cell() for _ in range(self.cols)] for _ in range(self.rows)]
         self.seed_infestation()
 
+    def get_grid(self):
+        return self.grid
+
     def get_neighbors(self, row: int, col: int) -> list:
         directions = [(-1, -1), (-1, 0), (-1, 1),
                       (0, -1),          (0, 1),
@@ -74,7 +78,5 @@ class CellAutomaton:
             for y in range(self.cols):
                 cell = self.grid[x][y]
                 neighbors = self.get_neighbors(x, y)
-                update_cell(cell, neighbors)
-
-    def get_grid(self):
-        return self.grid
+                infestation_power = self.settings.get("infestation_power", 1)
+                update_cell(cell, neighbors, infestation_power=infestation_power)

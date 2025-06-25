@@ -41,7 +41,7 @@ class SettingsView(tk.Frame):
         # Etapa del cultivo
         tk.Label(form_frame, text="Etapa del cultivo").grid(row=row, column=0, sticky="e", pady=5)
         self.stage_var = tk.StringVar(value="GROWING")
-        ttk.Combobox(form_frame, textvariable=self.stage_var, values=["GROWING", "GRAIN", "MATURE"]).grid(row=row, column=1)
+        ttk.Combobox(form_frame, textvariable=self.stage_var, values=["GRAIN", "GROWING", "MATURE"]).grid(row=row, column=1)
         row += 1
 
         # Tipo de cultivo
@@ -60,6 +60,18 @@ class SettingsView(tk.Frame):
         tk.Label(form_frame, text="Densidad de infestación inicial").grid(row=row, column=0, sticky="e", pady=5)
         self.infestation_var = tk.StringVar(value="MEDIUM")
         ttk.Combobox(form_frame, textvariable=self.infestation_var, values=["LOW", "MEDIUM", "HIGH"]).grid(row=row, column=1)
+        row += 1
+
+        # Densidad de ocupación
+        tk.Label(form_frame, text="Densidad de ocupación de cultivos (%)").grid(row=row, column=0, sticky="e", pady=5)
+        self.occupation_var = tk.IntVar(value=80)
+        tk.Entry(form_frame, textvariable=self.occupation_var).grid(row=row, column=1)
+        row += 1
+
+        # Capacidad de infestación
+        tk.Label(form_frame, text="Capacidad de infestación (1-3)").grid(row=row, column=0, sticky="e", pady=5)
+        self.infestation_power_var = tk.IntVar(value=2)
+        tk.Entry(form_frame, textvariable=self.infestation_power_var).grid(row=row, column=1)
         row += 1
 
         # Tamaño del grid
@@ -85,14 +97,19 @@ class SettingsView(tk.Frame):
     def _submit(self):
         self.settings = {
             "humidity": self.humidity_var.get(),
-            "solar": self.solar_var.get(),
-            "pesticides": self.pesticide_var.get(),
-            "stage": self.stage_var.get(),
-            "crop": self.crop_var.get(),
-            "plague": self.plague_var.get(),
-            "infestation": self.infestation_var.get(),
+            "solar_intensity": self.solar_var.get(),
+            "pesticide_level": self.pesticide_var.get(),
+            "crop_stage": self.stage_var.get(),
+            "crop_type": self.crop_var.get(),
+            "plague_type": self.plague_var.get(),
+            "infestation_density": self.infestation_var.get(),
+            "occupation_density": self.occupation_var.get(),
+            "infestation_power": self.infestation_power_var.get(),
             "rows": self.rows_var.get(),
             "cols": self.cols_var.get(),
             "steps": self.steps_var.get()
         }
         self.on_continue()
+
+    def get_settings(self):
+        return self.settings
