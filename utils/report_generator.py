@@ -3,41 +3,47 @@ from reportlab.pdfgen import canvas
 from datetime import datetime
 
 def generate_pdf_report(path, settings, stats):
-    c = canvas.Canvas(path, pagesize=A4)
+    c = canvas.Canvas(str(path), pagesize=A4)  # Asegura compatibilidad con objetos Path
     width, height = A4
-    y = height - 50
+    margin = 50
+    y = height - margin
 
+    def check_page_space(current_y):
+        if current_y < 100:
+            c.showPage()
+            return height - margin
+        return current_y
+
+    # Título principal
     c.setFont("Helvetica-Bold", 16)
-    c.drawString(50, y, "PlagueCrop - Simulation Report")
+    c.drawString(margin, y, "PlagueCrop - Simulation Report")
     y -= 30
 
+    # Fecha
     c.setFont("Helvetica", 10)
-    c.drawString(50, y, f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    c.drawString(margin, y, f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     y -= 20
 
+    # Sección: Configuración
     c.setFont("Helvetica-Bold", 12)
-    c.drawString(50, y, "Simulation Settings")
+    c.drawString(margin, y, "Simulation Settings")
     y -= 20
 
     c.setFont("Helvetica", 10)
     for key, value in settings.items():
-        c.drawString(60, y, f"{key}: {value}")
+        c.drawString(margin + 10, y, f"{key}: {value}")
         y -= 15
-        if y < 100:
-            c.showPage()
-            y = height - 50
+        y = check_page_space(y)
 
     y -= 10
     c.setFont("Helvetica-Bold", 12)
-    c.drawString(50, y, "Simulation Results")
+    c.drawString(margin, y, "Simulation Results")
     y -= 20
 
     c.setFont("Helvetica", 10)
     for key, value in stats.items():
-        c.drawString(60, y, f"{key}: {value}")
+        c.drawString(margin + 10, y, f"{key}: {value}")
         y -= 15
-        if y < 100:
-            c.showPage()
-            y = height - 50
+        y = check_page_space(y)
 
     c.save()
