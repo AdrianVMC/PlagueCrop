@@ -9,7 +9,7 @@ class SimulationView(tk.Frame):
         super().__init__(master)
         self.controller = controller
         self.settings = settings
-        self.configure(background="#f5f5f5")  # Fondo del tema
+        self.configure(background="#f5f5f5")
         
         # Configuración de la simulación
         self.rows = self.settings.get("rows", 20)
@@ -18,6 +18,7 @@ class SimulationView(tk.Frame):
         self.step_counter = 0
         self.max_steps = self.settings.get("steps", 20)
         self.is_paused = False
+        self.simulation_speed = 1000  # Velocidad inicial en ms (1 segundo)
         
         # Inicializar autómata celular
         self.automaton = CellAutomaton(self.rows, self.cols, self.settings)
@@ -100,6 +101,32 @@ class SimulationView(tk.Frame):
         )
         self.step_label.pack(side="left", padx=10)
         
+        # Control de velocidad
+        speed_frame = ttk.Frame(control_frame)
+        speed_frame.pack(side="left", padx=20)
+        
+        ttk.Label(
+            speed_frame,
+            text="Velocidad:",
+            font=("Segoe UI", 9)
+        ).pack(side="left")
+        
+        self.speed_slider = ttk.Scale(
+            speed_frame,
+            from_=50,  # Más rápido (50ms)
+            to=2000,   # Más lento (2 segundos)
+            value=self.simulation_speed,
+            command=self._update_speed
+        )
+        self.speed_slider.pack(side="left", padx=5)
+        
+        self.speed_label = ttk.Label(
+            speed_frame,
+            text=f"{self.simulation_speed}ms",
+            width=6
+        )
+        self.speed_label.pack(side="left")
+        
         # Frame para botones
         btn_frame = ttk.Frame(control_frame)
         btn_frame.pack(side="right")
@@ -121,6 +148,11 @@ class SimulationView(tk.Frame):
             command=self._end_simulation
         ).pack(side="left", padx=5)
 
+    def _update_speed(self, value):
+        """Actualiza la velocidad de la simulación basada en el slider"""
+        self.simulation_speed = int(float(value))
+        self.speed_label.config(text=f"{self.simulation_speed}ms")
+
     def _run_simulation(self):
         if self.step_counter >= self.max_steps:
             self._end_simulation()
@@ -135,8 +167,8 @@ class SimulationView(tk.Frame):
             self.grid_view_infestation.draw()
             self.grid_view_damage.draw()
         
-        # Programar próximo paso
-        self.after(1000, self._run_simulation)
+        # Programar próximo paso con la velocidad actual
+        self.after(self.simulation_speed, self._run_simulation)
 
     def _toggle_pause(self):
         self.is_paused = not self.is_paused
