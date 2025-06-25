@@ -45,3 +45,7 @@ class Cell:
         # Para SIR
         self.infection_duration = 0
         self.recovery_timer = 0
+
+        # Cooldown local: impide reinfección inmediata
+        self.susceptibility_cooldown = 0
+
