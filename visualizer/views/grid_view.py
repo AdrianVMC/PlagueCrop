@@ -18,7 +18,9 @@ class GridView:
             "text": "#ffffff",
             "infestation": {
                 "HEALTHY": "#4a90e2",  # Azul claro
-                "INFESTED": "#e74c3c",  # Rojo
+                "EXPOSED": "#9b59b6",   # Morado para estado expuesto
+                "INFESTED_LIGHT": "#e67e22",  # Naranja para infestación leve
+                "INFESTED_SEVERE": "#e74c3c",  # Rojo para infestación grave
                 "RECOVERED": "#2ecc71"  # Verde
             },
             "damage": {
@@ -28,6 +30,23 @@ class GridView:
                 "SEVERE": "#c0392b"    # Rojo oscuro
             }
         }
+
+    def _get_legend_data(self):
+        if self.view_mode == "infestation":
+            return [
+                (self.colors["infestation"]["HEALTHY"], "Sano"),
+                (self.colors["infestation"]["EXPOSED"], "Expuesto"),
+                (self.colors["infestation"]["INFESTED_LIGHT"], "Infestación leve"),
+                (self.colors["infestation"]["INFESTED_SEVERE"], "Infestación grave"),
+                (self.colors["infestation"]["RECOVERED"], "Recuperado")
+            ]
+        else:
+            return [
+                (self.colors["damage"]["NONE"], "Sin daño"),
+                (self.colors["damage"]["LOW"], "Daño leve"),
+                (self.colors["damage"]["MODERATE"], "Daño moderado"),
+                (self.colors["damage"]["SEVERE"], "Daño severo")
+            ]
 
     def draw(self):
         self.canvas.delete("all")
@@ -85,18 +104,3 @@ class GridView:
             )
             
             x_offset += 120  # Espacio entre elementos de leyenda
-
-    def _get_legend_data(self):
-        if self.view_mode == "infestation":
-            return [
-                (self.colors["infestation"]["HEALTHY"], "Sano"),
-                (self.colors["infestation"]["INFESTED"], "Infestado"),
-                (self.colors["infestation"]["RECOVERED"], "Recuperado")
-            ]
-        else:
-            return [
-                (self.colors["damage"]["NONE"], "Sin daño"),
-                (self.colors["damage"]["LOW"], "Daño leve"),
-                (self.colors["damage"]["MODERATE"], "Daño moderado"),
-                (self.colors["damage"]["SEVERE"], "Daño severo")
-            ]
