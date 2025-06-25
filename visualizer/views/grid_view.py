@@ -41,3 +41,25 @@ class GridView:
                             fill = "#4caf50"
 
                 self.canvas.create_rectangle(x0, y0, x1, y1, fill=fill, outline=outline)
+
+        # Añadir leyenda en parte inferior
+        if self.view_mode == "infestation":
+            legend = [
+                ("#88c0d0", "HEALTHY"),
+                ("#ff5555", "INFESTED"),
+                ("#55ff55", "RECOVERED")
+            ]
+        else:
+            legend = [
+                ("#4caf50", "NONE"),
+                ("#ffcc00", "LOW"),
+                ("#ff8800", "MODERATE"),
+                ("#cc0000", "SEVERE")
+            ]
+
+        y_offset = self.cell_size * len(self.automaton.grid) + 10
+        x_offset = 10
+        for color, label in legend:
+            self.canvas.create_rectangle(x_offset, y_offset, x_offset + 20, y_offset + 20, fill=color, outline="#444")
+            self.canvas.create_text(x_offset + 30, y_offset + 10, anchor="w", text=label, fill="white", font=("Arial", 10))
+            x_offset += 100

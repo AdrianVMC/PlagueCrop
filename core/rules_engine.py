@@ -77,8 +77,11 @@ def update_cell(cell: Cell, neighbors: list[Cell], infestation_power: int = 1, s
 
     cell.damage_capacity = get_damage_capacity(plague_type, crop_type)
 
+    if not cell.occupied:
+        return
+
     if cell.infestation_state == InfestationState.HEALTHY:
-        if cell.susceptibility_cooldown > 0:
+        if hasattr(cell, "susceptibility_cooldown") and cell.susceptibility_cooldown > 0:
             cell.susceptibility_cooldown -= 1
             return
 
@@ -87,6 +90,7 @@ def update_cell(cell: Cell, neighbors: list[Cell], infestation_power: int = 1, s
             cell.infestation_state = InfestationState.INFESTED
             cell.infection_duration = 1
             cell.plague_density = 1
+            cell.susceptibility_cooldown = susceptibility_cooldown
 
     elif cell.infestation_state == InfestationState.INFESTED:
         cell.infection_duration += 1
