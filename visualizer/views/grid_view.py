@@ -2,52 +2,42 @@ import tkinter as tk
 from core.cell_state import InfestationState, DamageLevel
 
 class GridView:
-    def __init__(self, canvas: tk.Canvas, automaton, cell_size=20):
+    def __init__(self, canvas, automaton, cell_size=20, view_mode="infestation"):
         self.canvas = canvas
         self.automaton = automaton
         self.cell_size = cell_size
-        self.view_mode = "infestation"  # or "damage"
-
-    def set_view_mode(self, mode: str):
-        if mode in ["infestation", "damage"]:
-            self.view_mode = mode
-
-    def toggle_view_mode(self):
-        self.view_mode = "damage" if self.view_mode == "infestation" else "infestation"
+        self.view_mode = view_mode
 
     def draw(self):
         self.canvas.delete("all")
-        grid = self.automaton.get_grid()
-
-        for i, row in enumerate(grid):
+        for i, row in enumerate(self.automaton.grid):
             for j, cell in enumerate(row):
-                x1 = j * self.cell_size
-                y1 = i * self.cell_size
-                x2 = x1 + self.cell_size
-                y2 = y1 + self.cell_size
+                x0 = j * self.cell_size
+                y0 = i * self.cell_size
+                x1 = x0 + self.cell_size
+                y1 = y0 + self.cell_size
 
-                color = self._get_color(cell)
-                self.canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline="#222")
+                fill = "#2b2b2b"  # default background
+                outline = "#444"
 
-    def _get_color(self, cell):
-        if self.view_mode == "infestation":
-            if cell.infestation_state == InfestationState.HEALTHY:
-                return "#4caf50"  # verde
-            elif cell.infestation_state == InfestationState.INFESTED:
-                return "#f44336"  # rojo
-            elif cell.infestation_state == InfestationState.RECOVERED:
-                return "#6a5acd"  # azul/morado
-            else:
-                return "#9e9e9e"  # gris
+                if not cell.occupied:
+                    fill = "#1e1e1e"
+                else:
+                    if self.view_mode == "infestation":
+                        if cell.infestation_state.name == "INFESTED":
+                            fill = "#ff5555"
+                        elif cell.infestation_state.name == "RECOVERED":
+                            fill = "#55ff55"
+                        elif cell.infestation_state.name == "HEALTHY":
+                            fill = "#88c0d0"
+                    elif self.view_mode == "damage":
+                        if cell.damage_level.name == "LOW":
+                            fill = "#ffcc00"
+                        elif cell.damage_level.name == "MODERATE":
+                            fill = "#ff8800"
+                        elif cell.damage_level.name == "SEVERE":
+                            fill = "#cc0000"
+                        else:
+                            fill = "#4caf50"
 
-        elif self.view_mode == "damage":
-            if cell.damage_level == DamageLevel.NONE:
-                return "#4caf50"  # verde
-            elif cell.damage_level == DamageLevel.LOW:
-                return "#ffeb3b"  # amarillo
-            elif cell.damage_level == DamageLevel.MODERATE:
-                return "#ff9800"  # naranja
-            elif cell.damage_level == DamageLevel.SEVERE:
-                return "#b71c1c"  # rojo oscuro
-            else:
-                return "#9e9e9e"
+                self.canvas.create_rectangle(x0, y0, x1, y1, fill=fill, outline=outline)
