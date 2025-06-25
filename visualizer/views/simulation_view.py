@@ -29,6 +29,7 @@ class SimulationView(tk.Frame):
 
         tk.Button(control_frame, text="Reiniciar Simulación", command=self._restart_simulation).pack(side="left", padx=5)
         tk.Button(control_frame, text="Volver a Configuración", command=lambda: controller.show_view("SettingsView")).pack(side="left", padx=5)
+        tk.Button(control_frame, text="Alternar Vista", command=self._toggle_view).pack(side="left", padx=5)
 
         self.after(500, self._run_simulation)
 
@@ -46,3 +47,7 @@ class SimulationView(tk.Frame):
         self.grid_view = GridView(self.canvas, self.automaton, cell_size=self.cell_size)
         self.grid_view.draw()
         self.after(500, self._run_simulation)
+
+    def _toggle_view(self):
+        self.grid_view.toggle_view_mode()
+        self.grid_view.draw()
