@@ -37,7 +37,9 @@ class App(tk.Tk):
         if not view_class:
             raise ValueError(f"View {view_name} not found")
 
-        if view_name == "SettingsView":
+        if view_name == "MainView":
+            self.current_view = view_class(self, self._go_to_settings)
+        elif view_name == "SettingsView":
             self.current_view = view_class(self, self.on_continue)
         elif view_name == "SimulationView":
             self.current_view = view_class(self, self, self.settings)
@@ -45,6 +47,9 @@ class App(tk.Tk):
             self.current_view = view_class(self, self)
 
         self.current_view.pack(expand=True, fill="both", padx=20, pady=20)
+
+    def _go_to_settings(self, *_):
+        self.show_view("SettingsView")
 
     def on_continue(self):
         if hasattr(self.current_view, "get_settings"):

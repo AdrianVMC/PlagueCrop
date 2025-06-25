@@ -1,83 +1,98 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk
+
 
 class SettingsView(tk.Frame):
-    def __init__(self, master, controller):
-        super().__init__(master, bg="#F0F0F0")
-        self.controller = controller
-        self._create_widgets()
+    def __init__(self, master, on_continue):
+        super().__init__(master)
+        self.on_continue = on_continue
+        self.settings = {}
 
-    def _create_widgets(self):
-        section_env = ttk.LabelFrame(self, text="Entorno", style="Section.TLabelframe")
-        section_env.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
+        self._build_ui()
 
-        ttk.Label(section_env, text="Filas:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
-        self.entry_rows = ttk.Spinbox(section_env, from_=5, to=100, width=10)
-        self.entry_rows.grid(row=0, column=1, padx=5, pady=5)
+    def _build_ui(self):
+        tk.Label(self, text="Configuración de la Simulación", font=("Arial", 16, "bold")).pack(pady=10)
+        form_frame = tk.Frame(self)
+        form_frame.pack(pady=10)
 
-        ttk.Label(section_env, text="Columnas:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
-        self.entry_cols = ttk.Spinbox(section_env, from_=5, to=100, width=10)
-        self.entry_cols.grid(row=1, column=1, padx=5, pady=5)
+        row = 0
 
-        ttk.Label(section_env, text="Semilla aleatoria:").grid(row=2, column=0, padx=5, pady=5, sticky="w")
-        self.entry_seed = ttk.Entry(section_env, width=12)
-        self.entry_seed.grid(row=2, column=1, padx=5, pady=5)
+        # Humedad
+        tk.Label(form_frame, text="Nivel de humedad").grid(row=row, column=0, sticky="e", pady=5)
+        self.humidity_var = tk.IntVar(value=2)
+        for i in range(1, 4):
+            tk.Radiobutton(form_frame, text=str(i), variable=self.humidity_var, value=i).grid(row=row, column=i)
+        row += 1
 
-        section_crop = ttk.LabelFrame(self, text="Cultivos", style="Section.TLabelframe")
-        section_crop.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
+        # Solar
+        tk.Label(form_frame, text="Intensidad solar").grid(row=row, column=0, sticky="e", pady=5)
+        self.solar_var = tk.IntVar(value=2)
+        for i in range(1, 4):
+            tk.Radiobutton(form_frame, text=str(i), variable=self.solar_var, value=i).grid(row=row, column=i)
+        row += 1
 
-        ttk.Label(section_crop, text="Tipo de cultivo:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
-        self.combo_crop_type = ttk.Combobox(section_crop, values=["Maíz", "Trigo", "Arroz"], width=15)
-        self.combo_crop_type.grid(row=0, column=1, padx=5, pady=5)
+        # Pesticidas
+        tk.Label(form_frame, text="Nivel de pesticidas").grid(row=row, column=0, sticky="e", pady=5)
+        self.pesticide_var = tk.IntVar(value=1)
+        for i in range(1, 4):
+            tk.Radiobutton(form_frame, text=str(i), variable=self.pesticide_var, value=i).grid(row=row, column=i)
+        row += 1
 
-        ttk.Label(section_crop, text="Cantidad inicial:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
-        self.entry_crop_count = ttk.Spinbox(section_crop, from_=1, to=500, width=10)
-        self.entry_crop_count.grid(row=1, column=1, padx=5, pady=5)
+        # Etapa del cultivo
+        tk.Label(form_frame, text="Etapa del cultivo").grid(row=row, column=0, sticky="e", pady=5)
+        self.stage_var = tk.StringVar(value="GROWING")
+        ttk.Combobox(form_frame, textvariable=self.stage_var, values=["GROWING", "GRAIN", "MATURE"]).grid(row=row, column=1)
+        row += 1
 
-        ttk.Label(section_crop, text="Distribución:").grid(row=2, column=0, padx=5, pady=5, sticky="w")
-        self.combo_distribution = ttk.Combobox(section_crop, values=["Uniforme", "Agrupada", "Aleatoria"], width=15)
-        self.combo_distribution.grid(row=2, column=1, padx=5, pady=5)
+        # Tipo de cultivo
+        tk.Label(form_frame, text="Tipo de cultivo").grid(row=row, column=0, sticky="e", pady=5)
+        self.crop_var = tk.StringVar(value="MAIZE")
+        ttk.Combobox(form_frame, textvariable=self.crop_var, values=["MAIZE", "WHEAT", "BEAN"]).grid(row=row, column=1)
+        row += 1
 
-        section_plague = ttk.LabelFrame(self, text="Plaga", style="Section.TLabelframe")
-        section_plague.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
+        # Tipo de plaga
+        tk.Label(form_frame, text="Tipo de plaga").grid(row=row, column=0, sticky="e", pady=5)
+        self.plague_var = tk.StringVar(value="WORM")
+        ttk.Combobox(form_frame, textvariable=self.plague_var, values=["WORM", "BUG", "FLY"]).grid(row=row, column=1)
+        row += 1
 
-        ttk.Label(section_plague, text="Tipo de plaga:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
-        self.combo_plague_type = ttk.Combobox(section_plague, values=["Langosta", "Gusano", "Roya"], width=15)
-        self.combo_plague_type.grid(row=0, column=1, padx=5, pady=5)
+        # Densidad de infestación inicial
+        tk.Label(form_frame, text="Densidad de infestación inicial").grid(row=row, column=0, sticky="e", pady=5)
+        self.infestation_var = tk.StringVar(value="MEDIUM")
+        ttk.Combobox(form_frame, textvariable=self.infestation_var, values=["LOW", "MEDIUM", "HIGH"]).grid(row=row, column=1)
+        row += 1
 
-        ttk.Label(section_plague, text="Intensidad inicial:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
-        self.entry_intensity = ttk.Spinbox(section_plague, from_=1, to=100, width=10)
-        self.entry_intensity.grid(row=1, column=1, padx=5, pady=5)
+        # Tamaño del grid
+        tk.Label(form_frame, text="Filas de la cuadrícula").grid(row=row, column=0, sticky="e", pady=5)
+        self.rows_var = tk.IntVar(value=20)
+        tk.Entry(form_frame, textvariable=self.rows_var).grid(row=row, column=1)
+        row += 1
 
-        section_footer = tk.Frame(self, bg="#F0F0F0")
-        section_footer.grid(row=3, column=0, pady=10)
+        tk.Label(form_frame, text="Columnas de la cuadrícula").grid(row=row, column=0, sticky="e", pady=5)
+        self.cols_var = tk.IntVar(value=20)
+        tk.Entry(form_frame, textvariable=self.cols_var).grid(row=row, column=1)
+        row += 1
 
-        ttk.Button(section_footer, text="Continuar",
-                   style="Primary.TButton",
-                   command=self.controller).pack(pady=5)
+        # Número de pasos
+        tk.Label(form_frame, text="Número de pasos").grid(row=row, column=0, sticky="e", pady=5)
+        self.steps_var = tk.IntVar(value=20)
+        tk.Entry(form_frame, textvariable=self.steps_var).grid(row=row, column=1)
+        row += 1
 
-        self.grid_columnconfigure(0, weight=1)
+        # Botón de iniciar
+        tk.Button(self, text="Iniciar Simulación", command=self._submit).pack(pady=10)
 
-    def get_settings(self):
-        rows = int(self.entry_rows.get())
-        cols = int(self.entry_cols.get())
-        max_cells = rows * cols
-        crop_count = int(self.entry_crop_count.get())
-
-        if crop_count > max_cells:
-            messagebox.showwarning(
-                "Advertencia",
-                f"La cantidad máxima de cultivos para una grilla de {rows}x{cols} es {max_cells}. Se ajustará automáticamente."
-            )
-            crop_count = max_cells
-
-        return {
-            "rows": rows,
-            "cols": cols,
-            "seed": self.entry_seed.get(),
-            "crop_type": self.combo_crop_type.get(),
-            "crop_count": crop_count,
-            "distribution": self.combo_distribution.get(),
-            "plague_type": self.combo_plague_type.get(),
-            "intensity": int(self.entry_intensity.get())
+    def _submit(self):
+        self.settings = {
+            "humidity": self.humidity_var.get(),
+            "solar": self.solar_var.get(),
+            "pesticides": self.pesticide_var.get(),
+            "stage": self.stage_var.get(),
+            "crop": self.crop_var.get(),
+            "plague": self.plague_var.get(),
+            "infestation": self.infestation_var.get(),
+            "rows": self.rows_var.get(),
+            "cols": self.cols_var.get(),
+            "steps": self.steps_var.get()
         }
+        self.on_continue()

@@ -1,28 +1,80 @@
+from core.cell_state import Cell, InfestationState, PlagueType, CropStage
+from core.rules_engine import update_cell, get_damage_capacity
+from random import randint
+
 class CellAutomaton:
-    def __init__(self, rows, cols):
+    def __init__(self, rows: int, cols: int, settings: dict = None):
         self.rows = rows
         self.cols = cols
-        self.grid = [[0 for _ in range(cols)] for _ in range(rows)]
+        self.settings = settings or {}
+        self.grid = [[self._create_cell() for _ in range(cols)] for _ in range(rows)]
+        self.seed_infestation()
 
-    def set_initial_state(self, state_matrix):
-        self.grid = state_matrix
+    def _create_cell(self) -> Cell:
+        cell = Cell()
+        # Apply environment settings
+        cell.environment["humidity"] = self.settings.get("humidity", 50)
+        cell.environment["solar_intensity"] = self.settings.get("solar_intensity", 2)
+        cell.pesticide_level = self.settings.get("pesticide_level", 1)
 
-    def count_neighbors(self, row, col):
-        directions = [(-1,0), (1,0), (0,-1), (0,1)]
-        count = 0
-        for dr, dc in directions:
-            r, c = row + dr, col + dc
-            if 0 <= r < self.rows and 0 <= c < self.cols:
-                count += self.grid[r][c]
-        return count
+        # Crop stage from string
+        crop_stage_str = self.settings.get("crop_stage", "GROWING")
+        try:
+            cell.crop_stage = CropStage[crop_stage_str]
+        except KeyError:
+            cell.crop_stage = CropStage.GROWING
+
+        return cell
+
+    def seed_infestation(self):
+        plague_type = self.settings.get("plague_type", "WORM")
+        crop_type = self.settings.get("crop_type", "MAIZE")
+        damage_capacity = get_damage_capacity(plague_type, crop_type)
+
+        # Cuántas celdas se infestan según densidad
+        density = self.settings.get("infestation_density", "MEDIUM").upper()
+        total_cells = self.rows * self.cols
+
+        count = {
+            "LOW": total_cells // 100,
+            "MEDIUM": total_cells // 40,
+            "HIGH": total_cells // 20
+        }.get(density, 5)
+
+        seeded = 0
+        while seeded < count:
+            x = randint(0, self.rows - 1)
+            y = randint(0, self.cols - 1)
+            cell = self.grid[x][y]
+            if cell.infestation_state == InfestationState.HEALTHY and cell.occupied:
+                cell.infestation_state = InfestationState.INFESTED
+                cell.plague_type = plague_type
+                cell.plague_density = 1
+                cell.damage_capacity = damage_capacity
+                seeded += 1
+
+    def initialize_with_settings(self, settings: dict):
+        self.settings = settings
+        self.grid = [[self._create_cell() for _ in range(self.cols)] for _ in range(self.rows)]
+        self.seed_infestation()
+
+    def get_neighbors(self, row: int, col: int) -> list:
+        directions = [(-1, -1), (-1, 0), (-1, 1),
+                      (0, -1),          (0, 1),
+                      (1, -1),  (1, 0), (1, 1)]
+        neighbors = []
+        for dx, dy in directions:
+            nx, ny = row + dx, col + dy
+            if 0 <= nx < self.rows and 0 <= ny < self.cols:
+                neighbors.append(self.grid[nx][ny])
+        return neighbors
 
     def step(self):
-        new_grid = [[0 for _ in range(self.cols)] for _ in range(self.rows)]
-        for r in range(self.rows):
-            for c in range(self.cols):
-                neighbors = self.count_neighbors(r, c)
-                if neighbors == 1:
-                    new_grid[r][c] = 1
-                else:
-                    new_grid[r][c] = 0
-        self.grid = new_grid
+        for x in range(self.rows):
+            for y in range(self.cols):
+                cell = self.grid[x][y]
+                neighbors = self.get_neighbors(x, y)
+                update_cell(cell, neighbors)
+
+    def get_grid(self):
+        return self.grid
